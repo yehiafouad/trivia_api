@@ -2,3 +2,5 @@ __pycache__
 .DS_Store
 .trashes
 .vscode
+node_modules
+trivia

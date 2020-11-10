@@ -24,7 +24,7 @@ class QuestionView extends Component {
 
   getQuestions = () => {
     $.ajax({
-      url: `${keys.SERVER_IP}/questions?page=${this.state.page}`, //TODO: update request URL
+      url: `${keys.SERVER_IP}/questions?page=${this.state.page}`, //DONE: update request URL
       type: "GET",
       success: (result) => {
         this.setState({
@@ -61,7 +61,7 @@ class QuestionView extends Component {
 
   getByCategory= (id) => {
     $.ajax({
-      url: `${keys.SERVER_IP}/categories/${id}/questions`, //TODO: update request URL
+      url: `${keys.SERVER_IP}/categories/${id}/questions`, //DONE: update request URL
       type: "GET",
       success: (result) => {
         if (result.error) {
@@ -82,11 +82,7 @@ class QuestionView extends Component {
 
   submitSearch = (searchTerm) => {
     $.ajax({
-<<<<<<< HEAD
-      url: `${keys.SERVER_IP}/searchQuestions`, //TODO: update request URL
-=======
-      url: `/searchQuestions`, //TODO: update request URL
->>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89
+      url: `${keys.SERVER_IP}/searchQuestions`, //DONE: update request URL
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
@@ -118,7 +114,7 @@ class QuestionView extends Component {
     if(action === 'DELETE') {
       if(window.confirm('are you sure you want to delete the question?')) {
         $.ajax({
-          url: `${keys.SERVER_IP}/questions/${id}`, //TODO: update request URL
+          url: `${keys.SERVER_IP}/questions/${id}`, //DONE: update request URL
           type: "DELETE",
           success: (result) => {
             this.getQuestions();

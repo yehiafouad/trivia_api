@@ -4,11 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 from models import setup_db, Question, Category
-<<<<<<< HEAD
-from functions import paginate_questions
-=======
 from functions import paginate_questions, random_Qs, detect_isUsed
->>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89
 
 QUESTIONS_PER_PAGE = 10
 
@@ -23,11 +19,7 @@ def create_app(test_config=None):
   def after_request(response):
       response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
       response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-<<<<<<< HEAD
-      response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
-=======
       response.headers.add('Access-Control-Allow-Origin', '*')
->>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89
       return response
 
   @app.route('/categories')
@@ -157,22 +149,14 @@ def create_app(test_config=None):
     try:
 
       # get the category data by id
-<<<<<<< HEAD
-      categoryData = Category.query.filter_by(id=id).one_or_none()
-=======
       categoryData = Category.query.filter_by(id=id).one()
->>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89
 
       # return error if catergory isn't found
       if (categoryData is None):
         return jsonify({'error': True, 'message': 'There is no category found'})
 
       # get all questions for this category
-<<<<<<< HEAD
-      questions = Question.query.filter_by(category=categoryData.id).all()
-=======
       questions = Question.query.filter_by(category=str(categoryData.id)).all()
->>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89
 
       # paginate questions
       paginateQ = paginate_questions(request, questions, QUESTIONS_PER_PAGE)
@@ -187,26 +171,6 @@ def create_app(test_config=None):
     except:
       abort(404)
 
-<<<<<<< HEAD
-  '''
-  @TODO: 
-  Create a POST endpoint to get questions to play the quiz. 
-  This endpoint should take category and previous question parameters 
-  and return a random questions within the given category, 
-  if provided, and that is not one of the previous questions. 
-
-  TEST: In the "Play" tab, after a user selects "All" or a category,
-  one question at a time is displayed, the user is allowed to answer
-  and shown whether they were correct or not. 
-  '''
-  
-
-  '''
-  @TODO: 
-  Create error handlers for all expected errors 
-  including 404 and 422. 
-  '''
-=======
   @app.route('/quizzes', methods=['POST'])
   def get_quizzes():
     # Get the body fields
@@ -247,7 +211,6 @@ def create_app(test_config=None):
   @app.errorhandler(422)
   def unprocessable(error):
         return jsonify({'success': False, 'code': 422, 'message': 'unprocessable'}), 422
->>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89
   
   return app
 

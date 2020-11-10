@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import $ from 'jquery';
 
 import '../stylesheets/QuizView.css';
+import { keys } from '../config/keys';
 
 const questionsPerPlay = 5; 
 
@@ -22,7 +23,7 @@ class QuizView extends Component {
 
   componentDidMount(){
     $.ajax({
-      url: `/categories`, //TODO: update request URL
+      url: `${keys.SERVER_IP}/categories`, //DONE: update request URL
       type: "GET",
       success: (result) => {
         this.setState({ categories: result.categories })
@@ -48,7 +49,7 @@ class QuizView extends Component {
     if(this.state.currentQuestion.id) { previousQuestions.push(this.state.currentQuestion.id) }
 
     $.ajax({
-      url: '/quizzes', //TODO: update request URL
+      url: `${keys.SERVER_IP}/quizzes`, //DONE: update request URL
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',

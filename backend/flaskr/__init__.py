@@ -4,7 +4,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 from models import setup_db, Question, Category
+<<<<<<< HEAD
 from functions import paginate_questions
+=======
+from functions import paginate_questions, random_Qs, detect_isUsed
+>>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89
 
 QUESTIONS_PER_PAGE = 10
 
@@ -19,7 +23,11 @@ def create_app(test_config=None):
   def after_request(response):
       response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization,true')
       response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+<<<<<<< HEAD
       response.headers.add('Access-Control-Allow-Origin', 'http://localhost:3000')
+=======
+      response.headers.add('Access-Control-Allow-Origin', '*')
+>>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89
       return response
 
   @app.route('/categories')
@@ -149,14 +157,22 @@ def create_app(test_config=None):
     try:
 
       # get the category data by id
+<<<<<<< HEAD
       categoryData = Category.query.filter_by(id=id).one_or_none()
+=======
+      categoryData = Category.query.filter_by(id=id).one()
+>>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89
 
       # return error if catergory isn't found
       if (categoryData is None):
         return jsonify({'error': True, 'message': 'There is no category found'})
 
       # get all questions for this category
+<<<<<<< HEAD
       questions = Question.query.filter_by(category=categoryData.id).all()
+=======
+      questions = Question.query.filter_by(category=str(categoryData.id)).all()
+>>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89
 
       # paginate questions
       paginateQ = paginate_questions(request, questions, QUESTIONS_PER_PAGE)
@@ -171,6 +187,7 @@ def create_app(test_config=None):
     except:
       abort(404)
 
+<<<<<<< HEAD
   '''
   @TODO: 
   Create a POST endpoint to get questions to play the quiz. 
@@ -189,6 +206,48 @@ def create_app(test_config=None):
   Create error handlers for all expected errors 
   including 404 and 422. 
   '''
+=======
+  @app.route('/quizzes', methods=['POST'])
+  def get_quizzes():
+    # Get the body fields
+    body = request.get_json()
+    prev = body.get('previous_questions')
+    categoryId = body.get('quiz_category')
+
+    # Return error if previous questions or categories are None
+    if (prev is None) or (categoryId is None):
+      return jsonify({'error': True, 'message': 'There is no categories or questions found!'})
+      
+    try:
+      # Get all questions for all categories or for selected category
+      if categoryId['id'] == 0:
+        questions = Question.query.all()
+      else:
+        questions = Question.query.filter_by(category=str(categoryId['id'])).all()
+
+        # Return random questions
+        question = random_Qs(questions)
+
+        # Detect the used questions from previous questions 
+        while (detect_isUsed(question, prev)):
+          question = random_Qs(questions)
+
+          # Check if previous questions length are equal questions length
+          if (len(prev) == len(questions)):
+            return jsonify({'success': True})
+
+        return jsonify({'success': True, 'question': question.format()})
+    except:
+      abort(422)
+        
+  @app.errorhandler(404)
+  def not_found(error):
+        return jsonify({'success': False, 'code': 404, 'message': 'resource not found'}), 404
+
+  @app.errorhandler(422)
+  def unprocessable(error):
+        return jsonify({'success': False, 'code': 422, 'message': 'unprocessable'}), 422
+>>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89
   
   return app
 

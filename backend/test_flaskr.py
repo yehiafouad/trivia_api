@@ -97,6 +97,17 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(data['success'])
 
+<<<<<<< HEAD
+=======
+    def test_get_quizzes(self):
+        res = self.client().post('/quizes', json={'previous_question': [16, 17], 'quiz_category': {'type': 'Geography', 'id': '3'}})
+
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+>>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89
 
 
 

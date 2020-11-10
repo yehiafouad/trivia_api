@@ -2,4 +2,9 @@ __pycache__
 .DS_Store
 .trashes
 .vscode
+<<<<<<< HEAD
 node_modules
+=======
+node_modules
+trivia
+>>>>>>> fb8f3040269a891bfff630340bad0e446f69fa89

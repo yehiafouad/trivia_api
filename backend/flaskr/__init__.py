@@ -45,7 +45,7 @@ def create_app(test_config=None):
 
   @app.route('/questions')
   def get_questions():
-      try:
+      # try:
         # get all categories
         categories = Category.query.all()
 
@@ -81,8 +81,29 @@ def create_app(test_config=None):
               'categories': categoriesData,
               'current_category': categoryType
           })
-        else:
+        elif request.args.get('search') is not None:
+          # get the search term from url args
+          searchTerm = request.args.get('search', type=str)
 
+          # Get the questions of the selected category
+          filteredQuestions = Question.query.filter(Question.question.ilike(f'%{searchTerm}%')).all()
+
+          # Paginate the questions as per page selected and return the remaining questions
+          filterQsPagination = paginate_questions(request, filteredQuestions, QUESTIONS_PER_PAGE)
+
+          # Check if there is no questions
+          if (len(filterQsPagination) == 0):
+            return jsonify({'error': True, 'message': 'There are no questions found'})
+
+          # Return the data
+          return jsonify({
+              'success': True,
+              'questions': filterQsPagination,
+              'total_questions': len(filteredQuestions),
+              'categories': categoriesData,
+              'current_category': ''
+          })
+        else:
           # get all questions
           questions = Question.query.all()
 
@@ -104,8 +125,8 @@ def create_app(test_config=None):
             'categories': categoriesData,
             'current_category': ''
           })
-      except:
-        abort(404)
+      # except:
+      #   abort(404)
 
   @app.route('/questions/<int:id>', methods=['DELETE'])
   def delete_question(id):
@@ -151,28 +172,54 @@ def create_app(test_config=None):
 
   @app.route('/searchQuestions', methods=['POST'])
   def search_questions():
-    # Get the search field value
-    searchField = request.get_json().get('searchTerm')
+      # Get the search field value
+      searchField = request.get_json().get('searchTerm')
+      currentCategory = request.get_json().get('currentCategory')
 
-    try:
-      # Filter questions inside the database as per the search field value
-      questions = Question.query.filter(Question.question.ilike(f'%{searchField}%')).all()
+      try:
 
-      # Check if no questions match
-      if (len(questions) == 0):
-        return jsonify({'error': True, 'message': 'No results'})
-    
-      # paginate the results
-      paginateQ = paginate_questions(request, questions, QUESTIONS_PER_PAGE)
+        if currentCategory != '':
+          selectedCategory = Category.query.filter_by(type=currentCategory).one()
+          # Filter questions inside the database as per the search field value
+          questions = Question.query.filter((Question.question.ilike(f'%{searchField}%')) & (Question.category == selectedCategory.id)).all()
+        
+          categorySearchQs = []
+          for searchQ in questions:
+            categorySearchQs.append(searchQ.format())
+        
+          # Check if no questions match
+          if (len(questions) == 0):
+            return jsonify({'error': True, 'message': 'No results'})
+        
+        
+          # return results
+          return jsonify({
+            'success': True,
+            'questions': categorySearchQs,
+            'total_questions': len(categorySearchQs),
+            'current_category': currentCategory
+          })
+        else:
+          # Filter questions inside the database as per the search field value
+          questions = Question.query.filter(Question.question.ilike(f'%{searchField}%')).all()
 
-      # return results
-      return jsonify({
-        'success': True,
-        'questions': paginateQ,
-        'total_questions': len(Question.query.all())
-      })
-    except:
-      abort(422)
+          searchQs = []
+          for question in questions:
+            searchQs.append(question.format())
+
+          # Check if no questions match
+          if (len(questions) == 0):
+            return jsonify({'error': True, 'message': 'No results'})
+
+          # return results
+          return jsonify({
+            'success': True,
+            'questions': searchQs,
+            'total_questions': len(searchQs),
+            'current_category': ''
+          })
+      except:
+        abort(422)
 
   @app.route('/categories/<int:id>/questions')
   def get_questions_by_category(id):
@@ -221,6 +268,19 @@ def create_app(test_config=None):
       # Get all questions for all categories or for selected category
       if categoryId['id'] == 0:
         questions = Question.query.all()
+
+        # Return random questions
+        question = random_Qs(questions)
+
+        # Detect the used questions from previous questions 
+        while (detect_isUsed(question, prev)):
+          question = random_Qs(questions)
+
+          # Check if previous questions length are equal questions length
+          if (len(prev) == len(questions)):
+            return jsonify({'success': True})
+
+        return jsonify({'success': True, 'question': question.format()})
       else:
         questions = Question.query.filter_by(category=str(categoryId['id'])).all()
 

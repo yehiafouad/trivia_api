@@ -15,6 +15,7 @@ class QuestionView extends Component {
       totalQuestions: 0,
       categories: {},
       currentCategory: '',
+      searchTerm: ''
     }
   }
 
@@ -24,7 +25,7 @@ class QuestionView extends Component {
 
   getQuestions = () => {
     $.ajax({
-      url: `${keys.SERVER_IP}/questions?page=${this.state.page}${this.state.currentCategory !== '' ? `&category=${this.state.currentCategory}` : ''}`, //DONE: update request URL
+      url: `${keys.SERVER_IP}/questions?page=${this.state.page}${this.state.currentCategory !== '' ? `&category=${this.state.currentCategory}` : ''}${this.state.searchTerm !== '' ? `&search=${this.state.searchTerm}` : ''}`, //DONE: update request URL
       type: "GET",
       success: (result) => {
         if (result.error) {
@@ -85,12 +86,14 @@ class QuestionView extends Component {
   }
 
   submitSearch = (searchTerm) => {
+    console.log(searchTerm);
+    this.setState({searchTerm: searchTerm})
     $.ajax({
       url: `${keys.SERVER_IP}/searchQuestions`, //DONE: update request URL
       type: "POST",
       dataType: 'json',
       contentType: 'application/json',
-      data: JSON.stringify({searchTerm: searchTerm}),
+      data: JSON.stringify({searchTerm: searchTerm, currentCategory: this.state.currentCategory}),
       xhrFields: {
         withCredentials: true
       },

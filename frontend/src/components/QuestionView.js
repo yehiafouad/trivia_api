@@ -14,7 +14,7 @@ class QuestionView extends Component {
       page: 1,
       totalQuestions: 0,
       categories: {},
-      currentCategory: null,
+      currentCategory: '',
     }
   }
 
@@ -24,9 +24,13 @@ class QuestionView extends Component {
 
   getQuestions = () => {
     $.ajax({
-      url: `${keys.SERVER_IP}/questions?page=${this.state.page}`, //DONE: update request URL
+      url: `${keys.SERVER_IP}/questions?page=${this.state.page}${this.state.currentCategory !== '' ? `&category=${this.state.currentCategory}` : ''}`, //DONE: update request URL
       type: "GET",
       success: (result) => {
+        if (result.error) {
+          alert(result.message)
+          return
+        }
         this.setState({
           questions: result.questions,
           totalQuestions: result.total_questions,
@@ -134,7 +138,7 @@ class QuestionView extends Component {
         <div className="categories-list">
           <h2 onClick={() => {this.getQuestions()}}>Categories</h2>
           <ul>
-            {Object.keys(this.state.categories).map((id, ) => (
+            {Object.keys(this.state.categories).map((id) => (
               <li key={id} onClick={() => {this.getByCategory(id)}}>
                 {this.state.categories[id]}
                 <img className="category" src={`${this.state.categories[id]}.svg`}/>

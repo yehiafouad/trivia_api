@@ -2,11 +2,16 @@ from flask import request
 import random
 
 def paginate_questions(request, selection, qPerPage):
-    page = request.args.get('page', 1, type=int)
+    page = request.args.get('page', type=int)
+
     start = (page - 1) * qPerPage
     end = start + qPerPage
 
-    questions = [question.format() for question in selection]
+    questions = []
+
+    for question in selection:
+        questions.append(question.format())
+        
     current_questions = questions[start:end]
 
     return current_questions

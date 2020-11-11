@@ -45,36 +45,67 @@ def create_app(test_config=None):
 
   @app.route('/questions')
   def get_questions():
-    try:
-      # get all questions
-      questions = Question.query.all()
+      try:
+        # get all categories
+        categories = Category.query.all()
 
-      # Calculate the total of questions
-      totalQ = len(questions)
+        # Empty object for categories and add the type only for each category.
+        categoriesData = {}
+        for category in categories:
+          categoriesData[category.id] = category.type
 
-      paginateQuestions = paginate_questions(request, questions, QUESTIONS_PER_PAGE)
+        # Check if the request has args named category or not for questions of the selected category
+        if request.args.get('category') is not None:
 
-      # get all categories
-      categories = Category.query.all()
+          # get the category type from url args
+          categoryType = request.args.get('category', type=str)
 
-      # Empty object for categories and add the type only for each category.
-      categoriesData = {}
-      for category in categories:
-        categoriesData[category.id] = category.type
+          # Get the selected category data
+          filterCategory = Category.query.filter_by(type=categoryType).one()
+          
+          # Get the questions of the selected category
+          filteredQuestions = Question.query.filter_by(category=str(filterCategory.id)).all()
 
-      # Send error for empty questions
-      if (len(paginateQuestions) == 0):
-        return jsonify({'error': True, 'message': 'There are no questions found'})
+          # Paginate the questions as per page selected and return the remaining questions
+          filterQsPagination = paginate_questions(request, filteredQuestions, QUESTIONS_PER_PAGE)
+          
+          # Check if there is no questions
+          if (len(filterQsPagination) == 0):
+            return jsonify({'error': True, 'message': 'There are no questions found'})
 
-      # return the data as response object
-      return jsonify({
+          # Return the data
+          return jsonify({
+              'success': True,
+              'questions': filterQsPagination,
+              'total_questions': len(filteredQuestions),
+              'categories': categoriesData,
+              'current_category': categoryType
+          })
+        else:
+
+          # get all questions
+          questions = Question.query.all()
+
+          # Calculate the total of questions
+          totalQ = len(questions)
+
+          # Paginate the questions as per page selected
+          paginateQuestions = paginate_questions(request, questions, QUESTIONS_PER_PAGE)
+
+          # Send error for empty questions
+          if (len(paginateQuestions) == 0):
+            return jsonify({'error': True, 'message': 'There are no questions found'})
+
+          # return the data as response object
+          return jsonify({
             'success': True,
             'questions': paginateQuestions,
             'total_questions': totalQ,
-            'categories': categoriesData
-      })
-    except:
-      abort(404)
+            'categories': categoriesData,
+            'current_category': ''
+          })
+      except:
+        abort(404)
 
   @app.route('/questions/<int:id>', methods=['DELETE'])
   def delete_question(id):
@@ -108,7 +139,6 @@ def create_app(test_config=None):
     if (newQuestion is None) or (newAnswer is None) or (newDifficulty is None) or (newCategory is None):
       return jsonify({'error': True, 'message':'Fill the empty fields'})
 
-    print(newQuestion, newAnswer, newDifficulty, newCategory)
     try:
       # Create the new question
       newQ = Question(question=newQuestion, answer=newAnswer, difficulty=newDifficulty, category=newCategory)
@@ -150,22 +180,27 @@ def create_app(test_config=None):
 
       # get the category data by id
       categoryData = Category.query.filter_by(id=id).one()
-
+      print(categoryData.type)
       # return error if catergory isn't found
       if (categoryData is None):
         return jsonify({'error': True, 'message': 'There is no category found'})
 
       # get all questions for this category
-      questions = Question.query.filter_by(category=str(categoryData.id)).all()
+      questions = Question.query.filter_by(category=str(id)).all()
+      
+      questionsData = []
+
+      for question in questions:
+        questionsData.append(question.format())
 
       # paginate questions
-      paginateQ = paginate_questions(request, questions, QUESTIONS_PER_PAGE)
+      # paginateQ = paginate_questions(request, questions, QUESTIONS_PER_PAGE)
 
       # return results
       return jsonify({
         'success': True,
-        'questions': paginateQ,
-        'total_questions': len(Question.query.all()),
+        'questions': questionsData,
+        'total_questions': len(questions),
         'current_category': categoryData.type
       })
     except:

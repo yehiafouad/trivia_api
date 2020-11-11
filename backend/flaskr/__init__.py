@@ -85,10 +85,10 @@ def create_app(test_config=None):
           # get the search term from url args
           searchTerm = request.args.get('search', type=str)
 
-          # Get the questions of the selected category
+          # Get the questions of the search term
           filteredQuestions = Question.query.filter(Question.question.ilike(f'%{searchTerm}%')).all()
 
-          # Paginate the questions as per page selected and return the remaining questions
+          # Paginate the questions as per page selected and return the remaining results
           filterQsPagination = paginate_questions(request, filteredQuestions, QUESTIONS_PER_PAGE)
 
           # Check if there is no questions
